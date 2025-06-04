@@ -1,0 +1,21 @@
+version: 5.0.0
+variant: default
+
+logo:
+  text: 我的知识库
+
+navbar:
+  menu:
+    Home: /
+    知识库: /wiki/
+    物理: /wiki/physics/
+    计算机: /wiki/cs/
+    关于: /about
+
+article:
+  toc: true
+  readtime: true
+  update_time: auto
+
+footer:
+  copyright: 用💖发电
