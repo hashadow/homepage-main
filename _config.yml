@@ -2,10 +2,11 @@ title: Hexo
 subtitle: ''
 description: ''
 keywords: null
-author: John Doe
-language: en
-timezone: ''
-url: http://example.com
+author: Hanz Shadow
+language: zh-CN
+timezone: Asia/Shanghai
+url: https://hashadow.github.io
+root: /homepage-main-deploy/
 permalink: ':year/:month/:day/:title/'
 permalink_defaults: null
 pretty_urls:
@@ -59,5 +60,10 @@ include: null
 exclude: null
 ignore: null
 theme: icarus
+
+
 deploy:
-  type: ''
+  type: git
+  repo: git@github.com:hashadow/hompage-main-deploy.git
+  branch: gh-pages  # 或者 gh-pages，如果你想放在独立分支
+
