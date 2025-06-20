@@ -2,6 +2,7 @@ version: 5.1.0
 variant: default
 logo:
     text: Hanz
+root: /homepage-main-deploy/
 navbar:
     menu:
         Home: /
