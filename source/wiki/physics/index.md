@@ -5,11 +5,11 @@ toc: true
 ---
 
 ## 力学
-[查看力学内容](/wiki/physics/mechanics/)
+[查看力学内容](/homepage-main-deploy/wiki/physics/mechanics/)
 
 ## 光学
-[查看光学内容](/wiki/physics/optics/)
+[查看光学内容](/homepage-main-deploy/wiki/physics/optics/)
 
 ## 电磁学
 
-[查看电磁学内容](/wiki/physics/electromagnetics/)
+[查看电磁学内容](/homepage-main-deploy/wiki/physics/electromagnetics/)
