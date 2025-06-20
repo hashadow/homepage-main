@@ -64,6 +64,6 @@ theme: icarus
 
 deploy:
   type: git
-  repo: git@github.com:hashadow/hompage-main-deploy.git
+  repo: git@github.com:hashadow/homepage-main-deploy.git
   branch: gh-pages  # 或者 gh-pages，如果你想放在独立分支
 
