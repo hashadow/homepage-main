@@ -5,7 +5,7 @@ toc: true
 ---
 
 ## 算法基础
-[查看算法内容](/homepage-main-deploy/wiki/cs/algorithms.md/)
+[查看算法内容](/homepage-main-deploy/wiki/cs/algorithms/)
 
 ## 计算机网络
-[查看网络内容](/homepage-main-deploy/wiki/cs/networking.md/)
+[查看网络内容](/homepage-main-deploy/wiki/cs/networking/)
