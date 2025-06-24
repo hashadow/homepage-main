@@ -62,7 +62,7 @@ ignore: null
 theme: icarus
 inject:
   head_end:
-    - |
+    - >
       <script>
         window.MathJax = {
           tex: {
