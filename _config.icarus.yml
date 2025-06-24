@@ -15,3 +15,6 @@ article:
     update_time: auto
 footer:
     copyright: 用💖发电
+math:
+  enable: true
+  engine: mathjax
