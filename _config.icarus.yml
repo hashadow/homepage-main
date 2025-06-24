@@ -8,6 +8,7 @@ navbar:
         知识库: /wiki/
         物理: /wiki/physics/
         计算机: /wiki/cs/
+        教学: /teaching
         关于: /about
 article:
     toc: true
