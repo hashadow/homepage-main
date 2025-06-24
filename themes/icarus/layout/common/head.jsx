@@ -176,10 +176,6 @@ module.exports = class extends Component {
 
             {followItVerificationCode ? <meta name="follow.it-verification-code" content={followItVerificationCode} /> : null}
 
-            <script async
-                src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-            </script>
-
         </head>;
     }
 };
