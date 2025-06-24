@@ -1,6 +1,8 @@
 ---
 title: 物理知识专题
 layout: page
+categories:
+  - 物理
 toc: true
 ---
 
