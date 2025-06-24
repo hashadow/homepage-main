@@ -1,6 +1,7 @@
 ---
 title: 电磁学基础
 layout: page
+math: true
 toc: true
 ---
 
