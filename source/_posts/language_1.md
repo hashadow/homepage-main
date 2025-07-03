@@ -3,8 +3,9 @@ title: 物理专业英语
 date: 2025-06-26
 layout: post
 categories:
-  - 物理
   - 语言
+  - 物理
+  - 英语
 toc: true
 ---
 
