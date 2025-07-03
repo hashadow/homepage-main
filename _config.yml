@@ -59,6 +59,10 @@ pagination_dir: page
 include: null
 exclude: null
 ignore: null
+excerpt:
+  enable: true
+  depth: 1
+  length: 200
 theme: icarus
 
 deploy:
