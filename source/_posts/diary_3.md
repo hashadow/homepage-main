@@ -3,6 +3,7 @@ title: 讲题志
 date: 2025-06-27
 layout: post
 toc: true
+excerpt: 习题课的一些心得体会
 ---
 
 ## 6月27日

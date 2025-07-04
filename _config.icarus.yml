@@ -19,8 +19,3 @@ footer:
 math:
   enable: true
   engine: mathjax
-
-# 开启自动摘要
-excerpt_render:
-  enable: true
-  length: 200 # 自动摘要的字数

@@ -3,6 +3,7 @@ title: 试讲志
 date: 2025-06-26
 layout: post
 toc: true
+excerpt: 试讲的一些心得体会
 ---
 
 今天试讲啊啊啊：

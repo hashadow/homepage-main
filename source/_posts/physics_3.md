@@ -5,6 +5,7 @@ layout: post
 categories:
   - 物理
 toc: true
+excerpt: 试卷
 ---
 
 物理模型：

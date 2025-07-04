@@ -5,6 +5,7 @@ layout: post
 categories:
   - 物理
 toc: true
+excerpt: 物理史
 ---
 
 ==量子论相关==

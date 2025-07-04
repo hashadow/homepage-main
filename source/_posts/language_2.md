@@ -6,5 +6,6 @@ categories:
   - 语言
   - 日语
 toc: true
+excerpt: 日语语法
 ---
 

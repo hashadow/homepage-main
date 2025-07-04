@@ -5,6 +5,7 @@ layout: post
 categories:
   - 物理
 toc: true
+excerpt: 高中物理考点
 ---
 
 ### 专题一：直线运动
