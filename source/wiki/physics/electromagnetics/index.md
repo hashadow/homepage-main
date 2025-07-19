@@ -1,8 +1,12 @@
 ---
 title: 电磁学基础
+date: 2025-06-04
 layout: page
 math: true
 toc: true
+categories:
+  - 物理
+excerpt: 电与磁的世界
 ---
 
 ## 静电学
