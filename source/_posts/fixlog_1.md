@@ -11,6 +11,7 @@ excerpt: 个人主页的鸡毛蒜皮
 1. 添加公式
 2. 摘要显示
 3. 添加图片
+4. 增加栏目
 
 
 
@@ -44,6 +45,8 @@ excerpt: 摘要内容
 
 ## 图片
 
+### 对于post中的文章
+
 先修改hexo渲染器为 hexo-renderer-markdown-it：
 
 ```bash
@@ -68,5 +71,36 @@ source/_posts/
 
 最终呈现网页路径为：
 
-https://hashadow.github.io/homepage-main-deploy/2025/06/28/article/image.png
+https://hashadow.github.io/homepage-main-deploy/2025/06/28/article/image.jpg
+
+### 对于wiki中的文章
+
+文件架构为：
+
+```bash
+source/wiki/physics_h_school
+├── index.md
+└── image.jpg
+```
+
+在md文档中markdown引用图片：
+
+```markdown
+![image](./image.jpg)
+```
+
+最终呈现网页路径为：
+
+https://hashadow.github.io/homepage-main-deploy/wiki/physics/physics_h_school/image.jpg
+
+## 栏目
+
+在主题icarus的config里面找到menu并添加：
+
+```yaml
+navbar:
+    menu:
+        Home: /
+        new_column: /column_filename # in source file
+```
 
