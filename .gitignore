@@ -1,3 +1,4 @@
+
 # Hexo 自动生成的文件（不要加入 Git）
 public/
 .deploy_git/
@@ -19,3 +20,24 @@ Thumbs.db
 # Babel 和构建缓存
 node_modules/.cache/
 
+.Archive/
+.markeditor/
+!.metion/
+.metion/*
+!.metion/*_sort.config
+.markdown/
+.sync/
+.idea/
+.DS_STORE
+Thumbs.db*
+/.posts_info.json
+/posts_info.json
+/.git_settings.json
+/git_settings.json
+/.ios_file_manager_status*.json
+/.farbox_token.*
+/.farbox_auto_sync.*
+/__wechat.json
+/*.sqlite3
+_images_cache/
+.db/
