@@ -30,6 +30,4 @@ Habit - daily important:
 
 ## Later
 
-- [ ] 断舍离（衣物、包装盒、文档、etc.）
-- [ ] 会自动触发！
-- [ ] 改了一下
+- [ ] 断舍离（衣物、包装盒、文档、ChatGPT 对话 etc.）

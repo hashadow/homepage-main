@@ -236,32 +236,7 @@ markdown:
     - markdown-it-task-lists
 ```
 
-### 去掉复选框前的小点
-
-在 `source` 中新建一个 `custom.css` ，加入：
-
-```css
-/* 去掉任务列表前的小点 */
-ul.task-list,
-ul.task-list li {
-  list-style: none !important;
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-}
-
-/* 关掉 Icarus 可能加的伪元素 */
-.task-list-item::before {
-  content: none !important;
-}
-```
-
-然后在 Icarus 的 `_config.yml` 里通过 `inject` 引入：
-
-```yaml
-inject:
-  head:
-    - <link rel="stylesheet" href="/css/custom.css">
-```
+**ToDo: 去掉复选框前的小点**
 
 
 
