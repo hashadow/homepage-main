@@ -15,7 +15,6 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        with:
           # 若主题用了子模块，打开下面两行
           # submodules: true
           # persist-credentials: false
