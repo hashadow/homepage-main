@@ -21,3 +21,6 @@ footer:
 math:
   enable: true
   engine: mathjax
+inject:
+  head:
+    - <link rel="stylesheet" href="/css/custom.css">
