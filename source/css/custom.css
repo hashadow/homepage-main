@@ -1,16 +1,25 @@
-/* 兼容 markdown-it-task-lists 常见结构 */
-ul.task-list,
-.tasklist ul {
-  list-style: none;
+/* 0) 先撤销你之前可能写过的“全局 ul/ol 样式”；
+      如果有类似 .article-entry ul { list-style: decimal; } 先删掉或注释掉 */
+
+/* 1) 普通列表：明确各自的默认样式（防止被主题/之前样式改坏） */
+.article .article-entry ul { list-style: disc; }      /* 无序列表要圆点 */
+.article .article-entry ol { list-style: decimal; }   /* 有序列表要数字 */
+
+/* 2) 任务清单（markdown-it-task-lists 渲染的 UL）— 去掉任何项目符号/伪元素 */
+.article .article-entry ul.task-list,
+.article .article-entry ul.task-list li {
+  list-style: none !important;
+  margin-left: 0;
   padding-left: 0;
 }
-
-ul.task-list li,
-.tasklist ul li {
-  list-style: none;
+.article .article-entry ul.task-list > li::before,
+.article .article-entry .task-list-item::before {
+  content: none !important;
+  display: none !important;
 }
 
-/* 让复选框和文本间距更舒服（可选） */
-.task-list-item input[type="checkbox"] {
+/* 3) 复选框与文字的间距优化（可选） */
+.article .article-entry .task-list-item > input[type="checkbox"] {
   margin-right: .4em;
+  vertical-align: middle;
 }
