@@ -61,6 +61,13 @@ exclude: null
 ignore: null
 theme: icarus
 
+markdown:
+  render:
+    html: true
+    breaks: true
+  plugins:
+    - markdown-it-task-lists
+
 deploy:
   type: git
   repo: git@github.com:hashadow/homepage-main-deploy.git
