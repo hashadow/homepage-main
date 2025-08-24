@@ -13,6 +13,9 @@ excerpt: 个人主页的鸡毛蒜皮
 3. 添加图片
 4. 增加栏目
 5. 网页设置
+6. 任务格式渲染
+7. 网页自动部署
+8. 多端版本控制
 
 
 
@@ -205,4 +208,59 @@ ignore: null  # 忽略的文件或目录（不读取、不处理）
 theme: icarus  # 使用的主题名称
 
 ```
+
+
+
+## 任务复选框
+
+### 渲染
+
+安装 `markdown-it` 渲染器：
+
+```bash
+npm install hexo-renderer-markdown-it --save
+npm install markdown-it-task-lists --save
+```
+
+在 Hexo 根目录下新建或修改 `_config.yml`（不是 theme/icarus 的配置，而是站点级别的 `config.yml`），加上：
+
+```yaml
+markdown:
+  render:
+    html: true
+    xhtmlOut: false
+    breaks: true
+    linkify: true
+    typographer: true
+  plugins:
+    - markdown-it-task-lists
+```
+
+### 去掉复选框前的小点
+
+在 `source` 中新建一个 `custom.css` ，加入：
+
+```
+/* 去掉任务列表前的小点 */
+ul.task-list {
+  list-style: none;
+  padding-left: 0; /* 根据需要调整缩进 */
+}
+
+ul.task-list li {
+  list-style-type: none;
+}
+```
+
+然后在 Icarus 的 `_config.yml` 里通过 `inject` 引入：
+
+```
+inject:
+  head:
+    - <link rel="stylesheet" href="/css/custom.css">
+```
+
+
+
+## 自动部署
 

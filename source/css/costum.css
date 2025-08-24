@@ -1,0 +1,9 @@
+/* 去掉任务列表前的小点 */
+ul.task-list {
+  list-style: none;
+  padding-left: 0; /* 根据需要调整缩进 */
+}
+
+ul.task-list li {
+  list-style-type: none;
+}

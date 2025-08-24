@@ -68,6 +68,10 @@ markdown:
   plugins:
     - markdown-it-task-lists
 
+inject:
+  head:
+    - <link rel="stylesheet" href="/css/custom.css">
+    
 deploy:
   type: git
   repo: git@github.com:hashadow/homepage-main-deploy.git
