@@ -10,6 +10,7 @@ navbar:
         计算机: /wiki/cs/
         教学: /teaching
         计划: /plan
+        购物: /shopping
         关于: /about
 article:
     toc: true
