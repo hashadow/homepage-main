@@ -264,16 +264,14 @@ inject:
 
 ## 自动部署
 
-# 目标
+### 目标
 
 - 当你向 `homepage-main` 的主分支推送/合并代码时，自动：
   1. 安装依赖并渲染 Hexo
   2. 把 `public/` 推送到 `homepage-main-deploy`（可设为 `main` 或 `gh-pages` 分支）
   3. `homepage-main-deploy` 仓库开启 GitHub Pages 作为站点
 
-------
-
-# 准备工作（只做一次）
+### 准备工作（只做一次）
 
 1. **Personal Access Token (PAT)**
 
@@ -294,9 +292,7 @@ inject:
 
    - 如果 `themes/<your-theme>` 是 git submodule，请确保在源码库能正确拉取；否则在 CI 里要加 `submodules: true`。
 
-------
-
-# 在 `homepage-main` 新建工作流
+### 在 `homepage-main` 新建工作流
 
 在源码库里创建文件：`.github/workflows/deploy.yml`
 
@@ -318,7 +314,7 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        with:
+        # with:
           # 若主题用了子模块，打开下面两行
           # submodules: true
           # persist-credentials: false
@@ -348,8 +344,8 @@ jobs:
 
       - name: Deploy to homepage-main-deploy
         run: |
-          DEPLOY_REPO="github.com/<你的用户名或组织>/homepage-main-deploy.git"
-          TARGET_BRANCH="main"  # 或 gh-pages
+          DEPLOY_REPO="github.com/hashadow/homepage-main-deploy.git"
+          TARGET_BRANCH="gh-pages"  # 或 gh-pages
 
           cd public
 
@@ -368,41 +364,3 @@ jobs:
 > 说明：
 >
 > - 这里直接用 `public/` 初始化一个临时 git 仓库，强推到部署库的目标分支（常用 `main` 或 `gh-pages`）。
-> - 也可以用社区动作 `peaceiris/actions-gh-pages@v3` 推送到**同仓库**的 `gh-pages` 分支；但你是“分仓库部署”，上面脚本更直观可控。
-
-------
-
-# 常见可选项
-
-- **缓存 Hexo 静态资源**：上面已开启 `actions/setup-node` 的 npm 缓存。若你有大图/编译慢，可考虑在 Hexo 侧做资源缓存插件。
-
-- **只在特定路径改动时构建**：
-
-  ```
-  on:
-    push:
-      branches: [ main ]
-      paths:
-        - 'source/**'
-        - 'themes/**'
-        - '_config*.yml'
-        - 'package-lock.json'
-  ```
-
-- **子模块主题**：
-
-  - 打开 `actions/checkout` 的 `submodules: true`，必要时提供对私有子模块的读取凭证。
-
-- **CNAME**：
-
-  - 在 `public/` 根写入 `CNAME` 文件（上面的注释步骤）。
-  - 或者直接在 `homepage-main-deploy` 仓库里常驻一个 `CNAME` 文件（注意不要被强推覆盖）。
-
-------
-
-# 故障排查 Tips
-
-- **Push 被拒绝 / 权限问题**：确认 `GH_PAT` 有 `repo` 权限，部署库没有限制（例如 branch protection 禁止 force-push）。
-- **Pages 显示 404**：检查 `homepage-main-deploy` → Settings → Pages 中分支设置；推送后等几十秒再访问。
-- **自定义域名无效/SSL 错误**：`CNAME` 文件是否正确、DNS CNAME 解析是否到 `*.github.io`，并在 Pages 设置中启用 HTTPS。
-- **Hexo 构建失败**：查看 Actions 日志；本地 `npm ci && npx hexo g` 能否通过；Node 版本与插件兼容性。
