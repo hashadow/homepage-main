@@ -1,0 +1,59 @@
+name: Build & Deploy Hexo to homepage-main-deploy
+
+on:
+  push:
+    branches: [ main ]   # 若你的默认分支不是 main，改成对应名称
+  workflow_dispatch:      # 允许手动触发
+
+permissions:
+  contents: read
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          # 若主题用了子模块，打开下面两行
+          # submodules: true
+          # persist-credentials: false
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci 
+
+      - name: Generate site
+        run: |
+          # 可选：清理
+          npx hexo clean
+          # 生成静态文件到 public/
+          npx hexo generate
+
+      # 如果需要写入 CNAME（自定义域名），在这里创建
+      # - name: Add CNAME
+      #   run: echo "example.com" > public/CNAME
+
+      - name: Deploy to homepage-main-deploy
+        run: |
+          DEPLOY_REPO="github.com/hashadow/homepage-main-deploy.git"
+          TARGET_BRANCH="gh-pages"  # 或 gh-pages
+
+          cd public
+
+          # 初始化独立仓库并推送
+          git init
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add .
+          git commit -m "Deploy from ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
+          git branch -M ${TARGET_BRANCH}
+          git push --force "https://${GH_PAT}@${DEPLOY_REPO}" ${TARGET_BRANCH}
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}

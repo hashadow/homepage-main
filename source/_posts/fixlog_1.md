@@ -240,7 +240,7 @@ markdown:
 
 在 `source` 中新建一个 `custom.css` ，加入：
 
-```
+```css
 /* 去掉任务列表前的小点 */
 ul.task-list {
   list-style: none;
@@ -254,7 +254,7 @@ ul.task-list li {
 
 然后在 Icarus 的 `_config.yml` 里通过 `inject` 引入：
 
-```
+```yaml
 inject:
   head:
     - <link rel="stylesheet" href="/css/custom.css">
@@ -264,3 +264,145 @@ inject:
 
 ## 自动部署
 
+# 目标
+
+- 当你向 `homepage-main` 的主分支推送/合并代码时，自动：
+  1. 安装依赖并渲染 Hexo
+  2. 把 `public/` 推送到 `homepage-main-deploy`（可设为 `main` 或 `gh-pages` 分支）
+  3. `homepage-main-deploy` 仓库开启 GitHub Pages 作为站点
+
+------
+
+# 准备工作（只做一次）
+
+1. **Personal Access Token (PAT)**
+
+   - 访问 GitHub → Settings → Developer settings → Personal access tokens (classic)
+   - 新建一个 token，至少勾选 `repo` 权限
+   - 复制 token，在源码库 `homepage-main` → Settings → Secrets and variables → Actions → **New repository secret**
+   - 创建名为 **`GH_PAT`** 的 Secret，值粘贴你的 token
+
+   > 说明：也可以用 Deploy Key + 写权限，但 PAT 更通用。
+
+2. **配置 Pages（部署库）**
+
+   - 在 `homepage-main-deploy` → Settings → Pages
+   - Source 选择你要发布的分支（下面示例默认 `main`），目录选 `/ (root)`
+   - 如果有自定义域名，添加 `CNAME`（见下方）。
+
+3. **Hexo 主题（若为子模块）**
+
+   - 如果 `themes/<your-theme>` 是 git submodule，请确保在源码库能正确拉取；否则在 CI 里要加 `submodules: true`。
+
+------
+
+# 在 `homepage-main` 新建工作流
+
+在源码库里创建文件：`.github/workflows/deploy.yml`
+
+```
+name: Build & Deploy Hexo to homepage-main-deploy
+
+on:
+  push:
+    branches: [ main ]   # 若你的默认分支不是 main，改成对应名称
+  workflow_dispatch:      # 允许手动触发
+
+permissions:
+  contents: read
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          # 若主题用了子模块，打开下面两行
+          # submodules: true
+          # persist-credentials: false
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: |
+          npm ci
+          # 若未全局安装过 hexo-cli，也可以本地调用：npx hexo <cmd>
+          npm i -g hexo-cli
+
+      - name: Generate site
+        run: |
+          # 可选：清理
+          npx hexo clean
+          # 生成静态文件到 public/
+          npx hexo generate
+
+      # 如果需要写入 CNAME（自定义域名），在这里创建
+      # - name: Add CNAME
+      #   run: echo "example.com" > public/CNAME
+
+      - name: Deploy to homepage-main-deploy
+        run: |
+          DEPLOY_REPO="github.com/<你的用户名或组织>/homepage-main-deploy.git"
+          TARGET_BRANCH="main"  # 或 gh-pages
+
+          cd public
+
+          # 初始化独立仓库并推送
+          git init
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add .
+          git commit -m "Deploy from ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
+          git branch -M ${TARGET_BRANCH}
+          git push --force "https://${GH_PAT}@${DEPLOY_REPO}" ${TARGET_BRANCH}
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+```
+
+> 说明：
+>
+> - 这里直接用 `public/` 初始化一个临时 git 仓库，强推到部署库的目标分支（常用 `main` 或 `gh-pages`）。
+> - 也可以用社区动作 `peaceiris/actions-gh-pages@v3` 推送到**同仓库**的 `gh-pages` 分支；但你是“分仓库部署”，上面脚本更直观可控。
+
+------
+
+# 常见可选项
+
+- **缓存 Hexo 静态资源**：上面已开启 `actions/setup-node` 的 npm 缓存。若你有大图/编译慢，可考虑在 Hexo 侧做资源缓存插件。
+
+- **只在特定路径改动时构建**：
+
+  ```
+  on:
+    push:
+      branches: [ main ]
+      paths:
+        - 'source/**'
+        - 'themes/**'
+        - '_config*.yml'
+        - 'package-lock.json'
+  ```
+
+- **子模块主题**：
+
+  - 打开 `actions/checkout` 的 `submodules: true`，必要时提供对私有子模块的读取凭证。
+
+- **CNAME**：
+
+  - 在 `public/` 根写入 `CNAME` 文件（上面的注释步骤）。
+  - 或者直接在 `homepage-main-deploy` 仓库里常驻一个 `CNAME` 文件（注意不要被强推覆盖）。
+
+------
+
+# 故障排查 Tips
+
+- **Push 被拒绝 / 权限问题**：确认 `GH_PAT` 有 `repo` 权限，部署库没有限制（例如 branch protection 禁止 force-push）。
+- **Pages 显示 404**：检查 `homepage-main-deploy` → Settings → Pages 中分支设置；推送后等几十秒再访问。
+- **自定义域名无效/SSL 错误**：`CNAME` 文件是否正确、DNS CNAME 解析是否到 `*.github.io`，并在 Pages 设置中启用 HTTPS。
+- **Hexo 构建失败**：查看 Actions 日志；本地 `npm ci && npx hexo g` 能否通过；Node 版本与插件兼容性。

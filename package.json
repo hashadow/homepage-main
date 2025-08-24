@@ -25,5 +25,8 @@
     "hexo-theme-icarus": "^6.1.1",
     "hexo-theme-landscape": "^1.0.0",
     "markdown-it-task-lists": "^2.1.1"
+  },
+  "devDependencies": {
+    "hexo-cli": "^4.3.2"
   }
 }
