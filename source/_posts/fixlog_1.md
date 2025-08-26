@@ -8,14 +8,16 @@ excerpt: 个人主页的鸡毛蒜皮
 
 目前有用的调整
 
-1. 添加公式
-2. 摘要显示
-3. 添加图片
-4. 增加栏目
-5. 网页设置
-6. 任务格式渲染
-7. 网页自动部署
-8. 多端版本控制
+- [x] 添加公式
+- [x] 摘要显示
+- [x] 添加图片
+- [x] 增加栏目
+- [x] 网页设置
+- [x] 任务格式渲染
+- [ ] 任务复选框去点
+- [x] 网页自动部署
+- [x] 多端版本控制
+- [ ] 内容折叠
 
 
 
@@ -342,3 +344,316 @@ jobs:
 > 说明：
 >
 > - 这里直接用 `public/` 初始化一个临时 git 仓库，强推到部署库的目标分支（常用 `main` 或 `gh-pages`）。
+
+
+
+## 多端版本控制
+
+Mac: 先pull后push
+
+Metion: 每两分钟自动pull和push
+
+
+
+## 内容折叠 
+
+not finish yet
+
+by ChatGPT
+
+明白了——你要的是**Markdown 标题（如 H2～H5）渲染成 HTML 后，标题下面整段内容能按层级折叠/展开**，而不是手动写 `<details>`。下面给你一套在 **Hexo + Icarus** 下可直接用的“自动折叠小标题内容”方案（不改主题源码，仅用 `inject` 注入 JS/CSS）。
+
+### 一次性设置（推荐）
+
+#### 1) 新建样式 `/source/css/collapsible.css`
+
+```css
+/* 折叠容器（默认收起） */
+.hx-collapsible {
+  overflow: hidden;
+  transition: height 0.25s ease;
+  height: 0;
+}
+
+/* 展开态 */
+.hx-collapsible.open {
+  height: auto;
+}
+
+/* 为了平滑过渡：先用具体高度过渡，再切换为 auto */
+.hx-collapsible.animating {
+  will-change: height;
+}
+
+/* 标题右侧的小按钮 */
+.hx-toggle {
+  margin-left: .5rem;
+  font-size: .9em;
+  cursor: pointer;
+  user-select: none;
+  opacity: .7;
+}
+.hx-toggle:hover {
+  opacity: 1;
+}
+
+/* 让标题区域更像可交互，但不破坏原有 Anchor */
+.hx-heading-wrap {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+}
+.hx-heading-wrap .hx-title {
+  flex: 1 1 auto;
+}
+
+/* 视觉指示符（▶/▼） */
+.hx-toggle::before {
+  content: "▶";
+  display: inline-block;
+  transform: translateY(-1px);
+  transition: transform .2s ease;
+}
+.hx-toggle[aria-expanded="true"]::before {
+  content: "▼";
+  transform: translateY(-1px);
+}
+
+/* 可选：默认展开第一个 H2 小节（按需开启） */
+/*
+.hx-collapsible[data-level="2"]:first-of-type {
+  height: auto;
+}
+.hx-toggle[data-level="2"]:first-of-type { aria-expanded: true; }
+*/
+```
+
+#### 2) 新建脚本 `/source/js/collapsible.js`
+
+```js
+(function () {
+  // 你要折叠哪些层级的标题：H2~H5（H1 一般是文章大标题，不折叠）
+  const HEADING_MIN = 2;
+  const HEADING_MAX = 5;
+
+  // Icarus 有些站点启用 PJAX，需要在首次和 PJAX 完成后都运行
+  function onReady(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn, { once: true });
+    } else {
+      fn();
+    }
+    // 兼容 Icarus 的 pjax
+    document.addEventListener('pjax:complete', fn);
+  }
+
+  function isHeading(el) {
+    if (!el || el.nodeType !== 1) return false;
+    const m = el.tagName.match(/^H([1-6])$/);
+    if (!m) return false;
+    const level = parseInt(m[1], 10);
+    return level >= HEADING_MIN && level <= HEADING_MAX;
+  }
+
+  function headingLevel(el) {
+    return parseInt(el.tagName.replace('H', ''), 10);
+  }
+
+  function wrapHeadingWithToggle(h) {
+    // 已经处理过就跳过
+    if (h.dataset.hxProcessed === '1') return;
+
+    // 把原标题文字包一个 span，旁边放一个 toggle
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'hx-title';
+    while (h.firstChild) titleSpan.appendChild(h.firstChild);
+
+    const toggle = document.createElement('button');
+    toggle.className = 'hx-toggle';
+    toggle.type = 'button';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', '展开/收起内容');
+    toggle.dataset.level = String(headingLevel(h));
+
+    const wrap = document.createElement('div');
+    wrap.className = 'hx-heading-wrap';
+    wrap.appendChild(titleSpan);
+    wrap.appendChild(toggle);
+    h.appendChild(wrap);
+
+    h.dataset.hxProcessed = '1';
+    return toggle;
+  }
+
+  function collectSectionContent(startHeading) {
+    const myLevel = headingLevel(startHeading);
+    const content = [];
+    let el = startHeading.nextElementSibling;
+
+    while (el) {
+      if (isHeading(el)) {
+        // 到达下一个“同级或更高层级”的标题 -> 结束
+        if (headingLevel(el) <= myLevel) break;
+      }
+      content.push(el);
+      el = el.nextElementSibling;
+    }
+    return content;
+  }
+
+  // 为了平滑高度动画：先固定高度，再过渡到 0/auto
+  function setOpenState(box, open) {
+    const setHeight = (h) => {
+      box.style.height = `${h}px`;
+      // 强制回流让浏览器识别起始高度
+      // eslint-disable-next-line no-unused-expressions
+      box.offsetHeight;
+    };
+
+    box.classList.add('animating');
+
+    if (open) {
+      // 从 0 -> 内容高度
+      box.style.height = 'auto';
+      const target = box.clientHeight;
+      box.style.height = '0px';
+      // 下一帧再设到目标高度
+      requestAnimationFrame(() => {
+        setHeight(target);
+      });
+    } else {
+      // 从当前 auto -> 固定像素 -> 0
+      const current = box.clientHeight;
+      setHeight(current);
+      requestAnimationFrame(() => {
+        setHeight(0);
+      });
+    }
+
+    const onEnd = () => {
+      box.classList.remove('animating');
+      if (open) {
+        box.classList.add('open');
+        box.style.height = 'auto';
+      } else {
+        box.classList.remove('open');
+        box.style.height = '0px';
+      }
+      box.removeEventListener('transitionend', onEnd);
+    };
+    box.addEventListener('transitionend', onEnd, { once: true });
+  }
+
+  function applyCollapsibles(root) {
+    // 在正文区域执行；Icarus 常见内容容器选择器如下，按你的站点结构选一个
+    const containers = root ? [root] : document.querySelectorAll(
+      '.article .article-inner, .post-block .post-body, .article-content, .markdown-body'
+    );
+
+    containers.forEach(container => {
+      // 找到 H2~H5
+      const headings = Array.from(container.querySelectorAll(
+        Array.from({ length: HEADING_MAX - HEADING_MIN + 1 }, (_, i) => `h${i + HEADING_MIN}`).join(',')
+      ));
+
+      headings.forEach(h => {
+        const toggle = wrapHeadingWithToggle(h);
+        if (!toggle) return;
+
+        // 收集本标题到“下一个同级或更高层级标题”之间的所有节点
+        const sectionNodes = collectSectionContent(h);
+        if (!sectionNodes.length) return; // 没内容就不包
+
+        // 把这些节点包裹进折叠容器
+        const box = document.createElement('div');
+        box.className = 'hx-collapsible';
+        box.dataset.level = String(headingLevel(h));
+
+        // 默认：收起
+        // 若你想某些层级默认展开，可在这里判断 level 决定加不加 open
+        // if (headingLevel(h) === 2) box.classList.add('open'); // 例：默认展开所有 H2
+
+        sectionNodes.forEach(n => box.appendChild(n));
+        h.parentNode.insertBefore(box, h.nextSibling);
+
+        // 点击按钮切换
+        function toggleBox() {
+          const isOpen = box.classList.contains('open');
+          toggle.setAttribute('aria-expanded', String(!isOpen));
+          setOpenState(box, !isOpen);
+        }
+        toggle.addEventListener('click', toggleBox);
+
+        // 点击标题文字也可切换（避免影响标题内链接的点击）
+        const titleSpan = h.querySelector('.hx-title');
+        if (titleSpan) {
+          titleSpan.addEventListener('click', (e) => {
+            // 若点在内部链接上则放行
+            if ((e.target instanceof Element) && e.target.closest('a')) return;
+            toggle.click();
+          });
+        }
+      });
+
+      // 若 URL 带 #hash，自动展开对应标题所在段落
+      if (location.hash) {
+        const target = container.querySelector(location.hash);
+        if (target && isHeading(target)) {
+          const next = target.nextElementSibling;
+          if (next && next.classList.contains('hx-collapsible')) {
+            const btn = target.querySelector('.hx-toggle');
+            if (btn) btn.setAttribute('aria-expanded', 'true');
+            next.classList.add('open');
+            next.style.height = 'auto';
+          }
+        }
+      }
+    });
+  }
+
+  onReady(() => applyCollapsibles());
+})();
+```
+
+#### 3) 注入到站点（不改主题）
+
+在站点根目录的 `_config.yml` 里用 `inject` 引入（你之前已用过这个方式）：
+
+```yaml
+inject:
+  head:
+    - <link rel="stylesheet" href="/css/collapsible.css">
+  bottom:
+    - <script src="/js/collapsible.js"></script>
+```
+
+然后：
+
+```bash
+hexo clean && hexo g && hexo s   # 本地预览
+# 确认没问题再 hexo d 部署
+```
+
+### 使用 & 规则说明
+
+- 该脚本会把 **H2～H5** 当作“可折叠标题”，并自动把**从该标题到下一个“同级或更高层级”标题之间的所有内容**打包成一个折叠块。
+  - 例：H2 段落会一直包含到下一个 H2（或 H1）出现为止；其中的 H3/H4/H5 会被视为 H2 的子内容，一起被折叠。
+- **默认全部收起**。
+  - 想默认展开某些层级（比如 H2），在 JS 里找到注释 `// if (headingLevel(h) === 2) box.classList.add('open');` 取消注释即可。
+- **标题右侧有“▶/▼”按钮**，点标题文字（非链接区域）也能切换。
+- URL 若带 `#小标题锚点`，会**自动展开**该标题对应段落，方便分享直达。
+
+#### 针对你给的示例怎么折叠
+
+- 把你的内容按需要设置为 `##### 元素：`、`##### 课程结构：`、`##### 提问方法：`、`##### 符号`（H5），或者用 `##`/`###` 等。
+- 构建后，H2～H5 的每个小节都会变成“点标题即可展开/收起”的折叠段落，**支持多层级嵌套**。
+
+#### 常见坑位排查
+
+- **资源路径**：`/css/…` 与 `/js/…` 要与 `_config.yml` 的 `root:` 保持一致（你之前的 `root: /homepage-main-deploy/`，那就写成 `/homepage-main-deploy/css/collapsible.css` 和 `/homepage-main-deploy/js/collapsible.js`）。
+- **PJAX**：Icarus 若启用 PJAX，脚本里已监听 `pjax:complete`，无需额外处理。
+- **CDN/缓存**：改了 JS/CSS 不生效，多半是缓存。先 `hexo clean`，浏览器强刷或关缓存再看。
+
+------
+
+如果你愿意，把你站点的 `root:`、是否启用 PJAX、文章正文容器的实际选择器（例如 `.article-content`）告诉我，我可以把选择器改到最稳妥的版本，并按你的 `root` 直接给出可粘贴的最终注入片段。
