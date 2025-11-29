@@ -1,8 +1,5 @@
 ---
 title: 碎碎念
-mdate: 2025-11-29 21:19:56
-mdevice: iPhone
-doc_id: be71136895e04e97a31f840b4ae64d3e
 date: 2025-11-19
 layout: post
 toc: true
